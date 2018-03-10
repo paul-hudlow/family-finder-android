@@ -17,6 +17,7 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,18 +40,24 @@ public class FriendshipActivity extends AppCompatActivity {
             public void onClick(View view) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(FriendshipActivity.this);
                 builder.setTitle("Add Friend");
-                builder.setView(getLayoutInflater().inflate(R.layout.dialog_add_friend, null));
+                final View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_friend, null);
+                builder.setView(dialogView);
                 builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        EditText field = findViewById(R.id.friendname);
+                        EditText field = dialogView.findViewById(R.id.friendname);
                         friends.add(field.getText().toString());
+                        try {
+                            new AddFriendTask(
+                                    "https://family-finder-server.appspot.com",
+                                    "paul",
+                                    field.getText().toString()).execute();
+                        } catch (MalformedURLException e) {
+                            e.printStackTrace();
+                        }
                     }
                 });
                 builder.create().show();
-
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
             }
         });
 
@@ -58,7 +65,5 @@ public class FriendshipActivity extends AppCompatActivity {
         ListAdapter adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, friends);
         friendList.setAdapter(adapter);
     }
-
-
 
 }
