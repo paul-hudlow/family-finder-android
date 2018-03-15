@@ -49,7 +49,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.item_manage_friends) {
             Intent intent = new Intent(this, FriendshipActivity.class);
             startActivity(intent);
@@ -70,31 +69,36 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        addFriends();
+        refreshFriends();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        addFriends();
+        if (mMap != null) {
+            refreshFriends();
+        }
     }
 
-    private void addFriends() {
-        try {
-            GetLocationTask task = new GetLocationTask(
-                    "https://family-finder-server.appspot.com",
-                    "paul",
-                    "dave",
-                    new Callback<LatLng>() {
-                        @Override
-                        public void execute(LatLng result) {
-                            mMap.addMarker(new MarkerOptions().position(result).title("Dave"));
-                            mMap.moveCamera(CameraUpdateFactory.newLatLng(result));
-                        }
-                    });
-            task.execute();
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
+    private void refreshFriends() {
+        mMap.clear();
+        for (String friend : GlobalState.getInstance().getFriendList()) {
+            addFriend(friend);
         }
+    }
+
+    private void addFriend(final String friendId) {
+        GetLocationTask task = new GetLocationTask(
+                GlobalState.getInstance().getUserId(),
+                friendId,
+                new Callback<LatLng>() {
+                    @Override
+                    public void execute(LatLng result) {
+                        if (result != null) {
+                            mMap.addMarker(new MarkerOptions().position(result).title(friendId));
+                        }
+                    }
+                });
+        task.execute();
     }
 }

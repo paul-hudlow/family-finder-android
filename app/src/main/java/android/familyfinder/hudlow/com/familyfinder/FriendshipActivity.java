@@ -25,7 +25,7 @@ import java.util.Map;
 
 public class FriendshipActivity extends AppCompatActivity {
 
-    private List<String> friends = new ArrayList();
+    private List<String> friends = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,16 +45,17 @@ public class FriendshipActivity extends AppCompatActivity {
                 builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        EditText field = dialogView.findViewById(R.id.friendname);
+                        final EditText field = dialogView.findViewById(R.id.friendname);
                         friends.add(field.getText().toString());
-                        try {
-                            new AddFriendTask(
-                                    "https://family-finder-server.appspot.com",
-                                    "paul",
-                                    field.getText().toString()).execute();
-                        } catch (MalformedURLException e) {
-                            e.printStackTrace();
-                        }
+                        new AddFriendTask(
+                                "paul",
+                                field.getText().toString(),
+                                new Callback<Boolean>() {
+                                    @Override
+                                    public void execute(Boolean result) {
+                                        GlobalState.getInstance().getFriendList().add(field.getText().toString());
+                                    }
+                                }).execute();
                     }
                 });
                 builder.create().show();
@@ -62,7 +63,9 @@ public class FriendshipActivity extends AppCompatActivity {
         });
 
         ListView friendList = findViewById(R.id.friendlist);
-        ListAdapter adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, friends);
+        ListAdapter adapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_list_item_1,
+                this.friends);
         friendList.setAdapter(adapter);
     }
 

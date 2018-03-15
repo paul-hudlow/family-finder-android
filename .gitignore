@@ -12,3 +12,5 @@
 /gradlew
 /gradlew.bat
 /app/.gitignore
+/app/libs/*
+/app/libs/*
